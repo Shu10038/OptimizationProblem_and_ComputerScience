@@ -5,7 +5,6 @@
 #include<math.h>
 using namespace std;
 
-#define DEGREE 5
 
 /**********　行列の掛け算　**********/
 int calcMatrixMultiplication(
@@ -157,13 +156,10 @@ int main(){
 		calcMatrixMultiplication(2, 4, 4, A, diagMatrixSqua, solu1);//対角行列の平方
 		calcMatrixMultiplication(2, 4, 2, solu1, A_tra, AX2At);
 
-
 		//右辺
 		calcMatrixMultiplication(2, 4, 1, solu1, C, AX2c);
 
 		solvEquation(2, AX2At, AX2c, solu2);
-
-
 
 		calcMatrixMultiplication(4, 2, 1, A_tra, solu2, solu3);
 		for (i = 0; i < 4; ++i){
@@ -179,17 +175,20 @@ int main(){
 			dx[i] = diagMatrixSqua[4 * i + i] * Z[i] / z_nol;
 		}
 
+		//k+1の点の更新
 		for (i = 0; i < 4; ++i){
 			xk[i] += +alpha * dx[i];
 		}
+
+		//判定条件の計算
 		for (i = 0; i < 4; ++i){
-			z1 = z1 + dx[i] * dx[i];
+			z1 += z1 + dx[i] * dx[i];
 		}
 		if (upsilon>z1)break;
 		z1 = 0.0;
 	}
-	for (i = 0; i < 2; ++i)cout << endl << xk[i] << " " << endl;
-	cout << "最小値は " << xk[0] + xk[1] << endl;
+	cout << "x1 = " << xk[0] << "  X2 = " << xk[1] << endl;
+	cout << "最大値は " << xk[0] + xk[1] << endl;
 
 	return 0;
 }
