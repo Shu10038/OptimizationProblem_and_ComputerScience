@@ -127,21 +127,26 @@ int LP_SOLVER02(
 
 	//■STEP1；標準化
 	//スラック変数を挿入して標準化する
-	for (i = 0; i < numbVar; ++i){
+	for (i = 0; i < numbLim; ++i){
 		for (j = 0; j < numbVar + numbLim; ++j){
-			if (j < numbVar){ A[(2 * numbVar)*i + j] = leftSide[numbVar*i + j]; }
+			if (j < numbVar){ A[(numbVar + numbLim)*i + j] = leftSide[numbVar*i + j]; }
 			else if (j - numbVar == i){ A[(numbVar + numbLim)*i + j] = 1.0; }
 			else{ A[(numbVar + numbLim)*i + j] = 0.0; }
 		}
 	}
+//	for (i = 0; i < (numbVar + numbLim)*(numbLim); ++i)cout << A[i] << " ";////////////
+//	cout << endl;//////////////
+
 
 	//■STEP2；初期値の生成
-	//スラック変数以外に１を代入して，内点の初期値を仮決定する
+	//適当な変数のに１を代入して，内点の初期値を仮決定する
 	for (i = 0; i < numbLim; ++i){
 		for (j = 0; j <numbVar; ++j){
 			rightSide[i] -= leftSide[numbVar*i + j];
 		}
 	}
+//	for (i = 0; i < 2; ++i)cout << rightSide[i] << " ";////////////
+
 
 	//対角行列生成
 	double *diag;//探索する内点（ｋステップ目のｘの意味）
@@ -157,6 +162,7 @@ int LP_SOLVER02(
 	xk = (double *)malloc(sizeof(double)*(numbVar + numbLim));
 
 	solvEquation(numbLim, diag, rightSide, xk);
+//	for (i = 0; i < (numbVar + numbLim); ++i)cout << xk[i] << " ";////////////
 
 	//初期値移動
 	for (i = numbLim-1; i >=0; --i){
@@ -167,6 +173,9 @@ int LP_SOLVER02(
 		xk[i] = 1.0;
 	}
 
+//	for (i = 0; i < (numbVar + numbLim); ++i)cout << xk[i] << " ";////////////
+//	cout << endl;//////////////
+
 	//■STEP3；他の係数の準備
 	double *A_tra;	//転置行列
 	A_tra = (double *)malloc(sizeof(double)*(numbVar + numbLim)*(numbLim));
@@ -175,6 +184,8 @@ int LP_SOLVER02(
 			A_tra[numbLim*i + j] = A[(numbVar + numbLim)*j+i];
 		}
 	}
+//	for (i = 0; i < (numbVar + numbLim)*numbLim; ++i)cout << A_tra[i] << " ";////////////
+
 
 	double *C;
 	C = (double *)malloc(sizeof(double)*(numbVar + numbVar));
@@ -185,6 +196,7 @@ int LP_SOLVER02(
 		else{
 			C[i] = 0.0;
 		}
+
 	}
 
 	//結果や途中家計算を格納するための配列
@@ -216,7 +228,7 @@ int LP_SOLVER02(
 	double upsilon = 1.0e-16;//終了条件　ε
 	double alpha = 0.8;//更新則のゲイン
 
-	//■STEP4；内点法による線形計画法
+	//■STEP4；計算
 	while (1){
 		
 		//左辺
@@ -225,28 +237,42 @@ int LP_SOLVER02(
 			for (j = 0; j < numbVar + numbLim; ++j){
 				diagMatrix[i * (numbVar + numbLim) + j] = 0.0;
 				if (j == i)diagMatrix[i * (numbVar + numbLim) + j] = xk[i];
+//				cout << diagMatrix[i * (numbVar + numbLim) + j] << " ";/////////////
 			}
 		}
 		
+
+
 		calcMatrixMultiplication(numbVar + numbLim, numbVar + numbLim, numbVar + numbLim, diagMatrix, diagMatrix, diagMatrixSqua);//対角行列の平方
-		calcMatrixMultiplication(numbLim, numbVar + numbLim, numbVar + numbLim, A, diagMatrixSqua, solu1);//対角行列の平方
+		calcMatrixMultiplication(numbLim, numbVar + numbLim, numbVar + numbLim, A, diagMatrixSqua, solu1);//
+//		for (i = 0; i < (numbVar + numbLim)*numbLim; ++i)cout << A[i] << " ";////////////
 		calcMatrixMultiplication(numbLim, numbVar + numbLim, numbLim, solu1, A_tra, AX2At);
+//		for (i = 0; i < 4; ++i)cout << AX2At[i] << " ";////////////
+//		cout << endl;
 
 		//右辺
 		calcMatrixMultiplication(numbLim, numbVar + numbLim, 1, solu1, C, AX2c);
 		solvEquation(numbLim, AX2At, AX2c, solu2);
+//		for (i = 0; i < 4; ++i)cout << solu2[i] << " ";////////////ok
+//		cout << endl;//////////////
 
 		calcMatrixMultiplication(numbVar + numbLim, numbLim, 1, A_tra, solu2, solu3);
+
+//		for (i = 0; i < numbVar + numbLim; ++i)cout <<AX2c[i]<<" ";//////////////
+//		cout << endl;//////////////
 
 		for (i = 0; i < numbVar + numbLim; ++i){
 			Z[i] = C[i] - solu3[i];
 		}
+//		for (i = 0; i < numbVar + numbLim; ++i)cout << Z[i] << " ";////////////
+//		cout << " below Z"<<endl;//////////////
 
 		for (i = 0; i < numbVar + numbLim; ++i){
 			z_nol += (diagMatrix[(numbVar + numbLim) * i + i] * Z[i])*(diagMatrix[(numbVar + numbLim) * i + i] * Z[i]);
 			
 		}
 		z_nol = sqrt(z_nol);
+//		cout << z_nol << endl;
 
 		//更新則を計算する
 		for (i = 0; i < numbVar + numbLim; ++i){
@@ -257,19 +283,26 @@ int LP_SOLVER02(
 		for (i = 0; i < numbVar + numbLim; ++i){
 			xk[i] += alpha * dx[i];
 		}
+//		for (i = 0; i < numbVar + numbLim; ++i)cout << xk[i] << " ";////////////
+//		cout << endl;//////////////
+//		if (xk[0] <= 0.00353){////////
+//			cout << "Stop" << endl;////////
+//		}//////////////
+
 
 		//判定式の計算
 		for (i = 0; i < numbVar + numbLim; ++i){
 			z1 +=  dx[i] * dx[i];
 		}
-		if (upsilon > z1)break;//ε以下の場合はループ脱出
+		if (upsilon>z1)break;
 		z1 = 0.0;
 	}
 
-	//●STEP5；計算結果を返す（返す用の配列に渡す）
+	//■STEP5；計算結果を返す（返す用の配列に渡す）
 	for (i = 0; i < numbVar; ++i){
 		optimumSolution[i] = xk[i];
 	}
+
 
 	return 0;
 }
