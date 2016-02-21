@@ -82,8 +82,7 @@ double LP_SOLVER01(
 			tabl[(numbVar + numbLim + 1)*minRowNumb + i] /= pivo;
 		}
 
-
-		//
+		//‘|o‚µ‘€ì
 		for (i = 0; i < 1 + numbLim; ++i){
 			if (i != minRowNumb){
 				mult = tabl[(numbVar + numbLim + 1)*i + minColmNumb];
@@ -92,15 +91,6 @@ double LP_SOLVER01(
 				}
 			}
 		}
-		//ŒŸ¸+++++
-		for (i = 0; i < 1 + numbLim; ++i){
-			for (j = 0; j < numbVar + numbLim + 1; ++j){
-				cout << tabl[(numbVar + numbLim + 1)*i + j] << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-
 	}
 	int buff = 0;
 	for (i = 0; i < numbVar ; ++i){
