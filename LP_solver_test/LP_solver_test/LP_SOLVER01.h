@@ -102,11 +102,7 @@ double LP_SOLVER01(
 		else{ optimumSolution[i] = 0.0; }
 	}
 
-	double optiValu =0.0;
-	for (i = 0; i < numbVar; ++i){
-		optiValu += optimumSolution[i] * objective[i];
-	}
-	return optiValu;
+	return tabl[(numbVar + numbLim + 1) - 1];
 }
 
 
