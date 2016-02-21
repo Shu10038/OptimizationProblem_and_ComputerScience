@@ -3,7 +3,6 @@
 This is a solver of linear programming .It's used the simplex method.
 ’16/01/18　S.OHSAWA
 
-’16/02/13 修正
 */
 
 /******************************　　
@@ -35,7 +34,7 @@ double LP_SOLVER01(
 	//目的関数の列の作成
 	for (i = 0; i < numbVar + numbLim + 1; ++i){
 		if (i<numbVar){
-			tabl[i] = objective[i];
+			tabl[i] = -objective[i];
 		}
 		else{ tabl[i] = 0.0; }
 	}
@@ -65,17 +64,6 @@ double LP_SOLVER01(
 			}
 		}
 		if (minColu >= 0)break;
-
-		//検査+++++
-		/*
-		for (i = 0; i < 1 + numbLim; ++i){
-			for (j = 0; j < numbVar + numbLim + 1; ++j){
-				cout << tabl[(numbVar + numbLim + 1)*i + j] << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-		*/
 
 		//定数項の中から最小の列を選ぶ
 		minRowVari = tabl[(numbVar + numbLim + 1) * 2 - 1] / tabl[(numbVar + numbLim + 1) * 1 + minColmNumb];
@@ -114,15 +102,21 @@ double LP_SOLVER01(
 		cout << endl;
 
 	}
-	for (i = 0; i < numbVar; ++i){
-		for (j = 0; j < numbLim; ++j){
+	int buff = 0;
+	for (i = 0; i < numbVar ; ++i){
+		for (j = 0; j < numbLim + 1; ++j){
 			if (tabl[(numbVar + numbLim + 1)*j+i] == 1){
-				optimumSolution[i] = tabl[(numbVar + numbLim + 1)*(j + 1) - 1];
+				buff = j;
 			}
-		}
+		}if (buff != 0){ optimumSolution[i] = tabl[(numbVar + numbLim + 1)*(buff + 1) - 1]; }
+		else{ optimumSolution[i] = 0.0; }
 	}
 
-	return 0;
+	double optiValu =0.0;
+	for (i = 0; i < numbVar; ++i){
+		optiValu += optimumSolution[i] * objective[i];
+	}
+	return optiValu;
 }
 
 
